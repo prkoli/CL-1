@@ -1,0 +1,238 @@
+ML
+
+ass1
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score,confusion_matrix
+X = df.drop(columns=["Class Label"])
+y = df['Class Label']
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.2 , random_state = 100)
+X_train,y_train
+X_test,y_test
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+lda = LinearDiscriminantAnalysis(n_components = 2)
+X_train_lda = lda.fit_transform(X_train_scaled,y_train)
+X_test_lda = lda.transform(X_test_scaled)
+X_train_lda.shape
+classifier = LogisticRegression()
+classifier.fit(X_train_lda,y_train)
+y_pred = classifier.predict(X_test_lda)
+accuracy = accuracy_score(y_test,y_pred)
+conf_matrix = confusion_matrix(y_test,y_pred)
+
+print('Accuracy :',accuracy)
+print('Confusion matrix :\n',conf_matrix)
+
+
+ass2
+import pandas as pd
+import numpy as np
+from scipy import stats
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression,LogisticRegression
+from sklearn.metrics import r2_score,accuracy_score
+import warnings
+warnings.filterwarnings("ignore")
+info_df = df.describe()
+info_df
+df['Glucose'].var()
+var_df = info_df.loc[['std'],:]**2
+var_df.index = ['var']
+var_df
+info_df.append(var_df)
+df.skew()
+df.kurt()
+df.mode().iloc[0]
+X = df.drop('Outcome',axis=1)
+y = df['Outcome']
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size = 0.2 , random_state = 20)
+linear_regression = LinearRegression()
+linear_regression.fit(X_train,y_train)
+y_pred_linear = linear_regression.predict(X_test)
+r2_linear = r2_score(y_test,y_pred_linear)
+print(f"Linear Regression R-squared :", (r2_linear))
+logistic_reg = LogisticRegression()
+logistic_reg.fit(X_train,y_train)
+y_pred_logistic = logistic_reg.predict(X_test)
+accuracy = accuracy_score(y_test,y_pred_logistic)
+print(f"Logistic Regression Accuracy :",(accuracy))
+linear_regression.score(X_test,y_test)
+
+ass3
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix,accuracy_score,precision_score,recall_score
+ X = df.iloc[:,[2,3]]
+y = df['Purchased']
+
+X_train, X_test , y_train ,y_test = train_test_split(X,y, test_size=0.2 ,random_state = 100)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+k = 5  #no. of neighbours
+knn_classifier = KNeighborsClassifier(n_neighbors = k)
+knn_classifier.fit(X_train_scaled,y_train)
+
+y_pred = knn_classifier.predict(X_test_scaled)
+confusion_matrix(y_test,y_pred)
+accuracy = accuracy_score(y_test,y_pred)
+error_rate = 1 - accuracy
+precision = precision_score(y_test,y_pred)
+recall = recall_score(y_test,y_pred)
+
+print("Accuracy :" , accuracy *100 ,"%")
+print("Error rate :" , error_rate)
+print("Precison :" , precision)
+print("Recall :" , recall)
+
+
+
+ass4
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+X = df.iloc[:,1:-1]
+inertia = []
+for i in range(1,11) :
+    kmeans = KMeans(n_clusters=i,init='k-means++', max_iter=300 ,n_init=10, random_state=42)
+    kmeans.fit(X)
+    inertia.append(kmeans.inertia_)
+plt.plot(range(1,11) ,inertia, marker='o')
+plt.xlabel('Number of clusters')
+plt.ylabel('Inertia (within-cluster sum of squares)')
+plt.title('Elbow Method')
+plt.show()
+optimal_k = 3
+kmeans = KMeans(n_clusters=optimal_k, init='k-means++', max_iter=300, n_init=10, random_state=0)
+y_kmeans = kmeans.fit_predict(X)
+y_kmeans
+
+
+
+ass5
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score,confusion_matrix
+from sklearn.preprocessing import LabelEncoder 
+col_names = ['Buying' , 'maint' ,'doors' ,'persons' ,'lug_boot' ,'safety' ,'class']
+df.columns = col_names
+
+df.head()
+le = LabelEncoder()
+
+for col in df.columns:
+    if df[col].dtype != 'object':
+        continue
+
+    df[col] = le.fit_transform(df[col])
+df.head()
+
+X = df.drop(['class'],axis =1)
+y = df['class']
+
+X_train,X_test,y_train,y_test = train_test_split(X,y, test_size = 0.2,random_state=60)
+X_train.shape , X_test.shape
+rfc = RandomForestClassifier(n_estimators = 18+25)
+rfc.fit(X_train,y_train)
+y_pred = rfc.predict(X_test)
+accuracy = accuracy_score(y_test,y_pred)
+conf_matrix = confusion_matrix(y_test,y_pred)
+
+print('Accuracy:',accuracy*100,'%','\n')
+print('Confusion Matrix:\n',conf_matrix)
+
+
+
+
+ass6
+import numpy as np
+
+# Define the maze layout (0: open path, 1: wall, 2: goal)
+maze = np.array([
+    [0, 0, 0, 0, 0],
+    [0, 1, 0, 1, 0],
+    [0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0],
+    [0, 0, 0, 0, 2]  # 2 is the goal
+])
+
+# Q-learning parameters
+learning_rate = 0.1
+discount_factor = 0.9
+epsilon = 0.1
+num_episodes = 1000
+
+# Define the number of states and actions
+num_states, num_actions = maze.size, 4  # 4 actions: up, down, left, right
+Q = np.zeros((num_states, num_actions))  # Initialize Q-table with zeros
+
+# Mapping actions to directions
+actions = {
+    0: (-1, 0),  # Up
+    1: (1, 0),   # Down
+    2: (0, -1),  # Left
+    3: (0, 1)    # Right
+}
+
+# Training loop
+for episode in range(num_episodes):
+    state = 0  # Starting position
+    
+    while True:
+        # Choose action (epsilon-greedy)
+        if np.random.uniform(0, 1) < epsilon:
+            action = np.random.choice(num_actions)
+        else:
+            action = np.argmax(Q[state, :])
+
+        # Determine new state
+        row, col = divmod(state, maze.shape[1])
+        new_row = row + actions[action][0]
+        new_col = col + actions[action][1]
+        
+        # Ensure new state is within bounds
+        if 0 <= new_row < maze.shape[0] and 0 <= new_col < maze.shape[1]:
+            new_state = new_row * maze.shape[1] + new_col
+        else:
+            new_state = state  # Stay in the same state if out of bounds
+
+        # Get reward for new state
+        reward = -1 if maze.flat[new_state] == 0 else 1 if maze.flat[new_state] == 2 else 0
+        
+        # Q-learning update
+        Q[state, action] = Q[state, action] + learning_rate * (
+            reward + discount_factor * np.max(Q[new_state, :]) - Q[state, action]
+        )
+        
+        # Move to the new state
+        state = new_state
+
+        # End episode if goal is reached
+        if maze.flat[new_state] == 2:
+            break
+
+# Simulating the agent's path
+current_state = 0
+while current_state != np.where(maze == 2)[0][0] * maze.shape[1] + np.where(maze == 2)[1][0]:  # Goal state
+    action = np.argmax(Q[current_state, :])
+    row, col = divmod(current_state, maze.shape[1])
+    row += actions[action][0]
+    col += actions[action][1]
+    
+    # Update current state
+    current_state = row * maze.shape[1] + col
+    print("Agent moved to state:", current_state)
+
