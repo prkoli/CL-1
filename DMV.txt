@@ -1,0 +1,321 @@
+ass1
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import os
+excel_data = pd.read_excel("format2.xlsx")
+json_data = pd.read_json("format3.json")
+csv_data.head(1)
+excel_data.head(1)
+json_data.head(1)
+df = pd.concat([csv_data, excel_data, json_data])
+df.sample(3)
+df.describe()
+df.info()
+df.fillna(df.mean(), inplace=True)
+
+df["Date"] = pd.to_datetime(df["Date"])
+df["Time"] = pd.to_datetime(df["Time"])
+df.head()
+
+df.dtypes
+df.isna().sum()
+print(df.duplicated().sum())
+df.drop_duplicates(inplace=True)
+total_sales = df['Total'].sum()
+total_sales
+
+average_order_value = df.groupby('Gender')['Total'].mean()
+average_order_value
+product_category_distribution = df['Product line'].value_counts()
+product_category_distribution
+df.columns
+df.boxplot()
+plt.figure(figsize=(12, 6))
+plt.bar(df['Product line'], df['Total'], color='skyblue')
+plt.xlabel('Product Category')
+plt.ylabel('Total Sales Amount')
+plt.title('Total Sales by Product Category')
+plt.xticks(rotation=20)
+plt.show()
+
+
+
+
+ass2
+import requests
+import pandas as pd
+import json
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+API_key = '91dc4e027d565d766d090eec6efb196c'
+
+
+countries = ['Japan' , 'Saudi Arabia' , 'United States of America' , 'Indonesia' , 'India' , 'Egypt']
+
+country_name_list = []
+maxtemp = []
+mintemp = []
+humidity = []
+windspeed = []
+for country_names in countries:
+
+    # url = f'http://api.openweathermap.org/data/2.5/weather?q={country_names}&APPID={API_key}&units=metric'
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={country_names}&appid={API_key}&units=metric"
+
+    r = requests.get(url)
+        
+    data = r.json()
+        
+    formatted_json = json.dumps(data, sort_keys = True, indent = 4)
+    
+#     print(data)
+    country_name_list.append(data['name'])
+    maxtemp.append(data['main']['temp_max'])
+    mintemp.append(data['main']['temp_min'])
+    humidity.append(data['main']['humidity'])
+    windspeed.append(data['wind']['speed'])
+            
+
+df = pd.DataFrame()
+df['Names'] = country_name_list
+df['Max_Temp'] = maxtemp
+df['Min_Temp'] = mintemp
+df['Humidity'] = humidity
+df['WindSpeed'] = windspeed
+
+df.head()    
+average_temperature = df.groupby('Names')['Max_Temp'].mean()
+average_temperature
+average_temperature = df.groupby('Names')['Min_Temp'].mean()
+average_temperature
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['Max_Temp'], color = 'red')
+plt.title('Max. Temp. in Diff. coumtries')
+plt.xlabel('Countries')
+plt.ylabel('Temperature')
+plt.show()
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['Min_Temp'],color = 'lightblue')
+plt.title('Min. temp. in Diff. Countries')
+plt.xlabel('Countries')
+plt.ylabel('Temperature')
+plt.show()
+plt.figure(figsize=(10,6))
+plt.bar(df['Humidity'],df['Max_Temp'],color='lightgreen')
+plt.title('Relation btwn Humidity & Max. Temp.')
+plt.xlabel('Humidity')
+plt.ylabel('Max. Temperature')
+plt.show()
+plt.figure(figsize=(12,6))
+plt.bar(df['Names'],df['WindSpeed'],color='yellow')
+plt.title('Locationwise Winspeed Variation')
+plt.xlabel('Countries')
+plt.ylabel('Windspeed')
+plt.show()
+sns.pairplot(df)
+plt.show()
+corre = df[['Min_Temp','Humidity']].corr()
+sns.heatmap(corre, annot=True)
+plt.title("Temperature to Humidity relationship")
+plt.show()
+
+
+
+ass3
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+df.info()
+df.isna().sum()
+df.dropna(inplace=True)
+df.duplicated().sum()
+
+df.drop_duplicates(inplace=True)
+df.drop(['customer_id','state','city',"pincode",'telecom_partner','date_of_registration'], inplace=True, axis=1)
+df.head()
+le = LabelEncoder()
+df['gender'] = le.fit_transform(df['gender'])
+
+df.head()
+
+average_salary = df.groupby('age')['estimated_salary'].mean()
+average_salary.head()
+plt.figure(figsize=(12,6))
+df.boxplot()
+plt.show()
+plt.figure(figsize=(12,6))
+plt.bar(df['age'],df['estimated_salary'],color='green')
+plt.title('Age salary Estimation')
+plt.xlabel('age')
+plt.ylabel('estimated_salary')
+plt.show()
+sns.pairplot(df)
+plt.show()
+
+df.dtypes
+X = df.drop(columns=['churn'])
+y = df['churn']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+df.to_csv("Cleaned_Telecom_Customer_Churn.csv", index=False)
+
+
+
+
+
+ass4
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+df.isna().sum()
+df.boxplot()
+Q1 = df['price'].quantile(0.25)
+Q3 = df['price'].quantile(0.75)
+iqr = Q3 - Q1 
+minm= Q1 - (1.5*iqr)
+maxm = Q3 + (1.5*iqr)
+df=df[(df['price']>minm) & (df['price']<maxm)]
+df.head()
+df.dtypes
+df.boxplot()
+plt.show()
+le = LabelEncoder()
+df['mainroad'] = le.fit_transform(df['mainroad'])
+df['guestroom'] = le.fit_transform(df['guestroom'])
+df['basement'] = le.fit_transform(df['basement'])
+df['hotwaterheating'] = le.fit_transform(df['hotwaterheating'])
+df['airconditioning'] = le.fit_transform(df['airconditioning'])
+df['furnishingstatus'] = le.fit_transform(df['furnishingstatus'])
+df['prefarea'] = le.fit_transform(df['prefarea'])
+
+df.head()
+plt.figure(figsize=(12, 8))
+sns.heatmap(data = df.corr(), cmap = "coolwarm", annot=True) 
+plt.show()
+
+
+
+ass5
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+df.columns
+column_names = ['Id', 'Months', 'PM10', 'SO2', 'NOx',
+       'PM25', 'NH3', 'O3','CO', ' Benzene', 'AQI']
+
+df.columns = column_names
+df.head()
+df.isna().sum()
+df.dropna(inplace=True)
+df.isna().sum()
+df.describe()
+df.info()
+plt.figure(figsize=(16, 6))
+plt.plot(df['Months'], df['AQI'])
+plt.xlabel('Date')
+plt.ylabel('AQI')
+plt.xticks(rotation=90)
+plt.title('Air Quality Index (AQI) Trend Over Time')
+plt.show()
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['PM10'], color='red')
+plt.xlabel('Date')
+plt.xticks(rotation=75)
+plt.ylabel('PM10')
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['PM25'], color='blue')
+plt.xlabel('Date')
+plt.xticks(rotation=75)
+plt.ylabel('PM2.5')
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['CO'], label='CO', color='orange')
+plt.xlabel('Date')
+plt.xticks(rotation=75)
+plt.ylabel('Carbon Monoxide Levels')
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['SO2'], label='SO2', color='violet')
+plt.xlabel('Date')
+plt.ylabel('SO2')
+plt.xticks(rotation=75)
+plt.show()
+plt.figure(figsize=(12, 6))
+plt.plot(df['Months'], df['NOx'], label='NOx', color='purple')
+plt.xlabel('Date')
+plt.ylabel('NOx')
+plt.xticks(rotation=75)
+plt.show()
+plt.figure(figsize=(12, 6))
+plt.bar(df["Months"], df["AQI"], color="skyblue", label="AQI")
+plt.title("AQI Comparison Across Months")
+plt.xlabel("Months")
+plt.ylabel("AQI Value")
+plt.legend()
+plt.xticks(rotation=75)
+plt.show()
+plt.figure(figsize=(12, 6))
+df.boxplot(color='blue')
+plt.title("Distribution of AQI Values for Pollutants")
+plt.show()
+#Scatter plots to explore the relationship between AQI values and pollutant levels
+plt.figure(figsize=(12, 6))
+plt.scatter(df["AQI"], df["PM25"], c="red", label="PM2.5")
+plt.scatter(df["AQI"], df["SO2"], c="blue", label="SO2")
+plt.scatter(df["AQI"], df["O3"], c="green", label="O3")
+plt.title("Scatter Plot: AQI vs. Pollutant Levels")
+plt.xlabel("AQI Value")
+plt.ylabel("Pollutant Level")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+ass6
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df["invoice_date"] = pd.to_datetime(df["invoice_date"])
+df.head()
+df.describe()
+df.info()
+
+df.isna().sum()
+df.isnull().sum()
+df['Sales'] = df['quantity']*df['price']
+df.head()
+region_sales = df.groupby("shopping_mall")["Sales"].sum()
+region_sales.plot(kind="bar")
+# region_sales.plot()
+plt.title("Sales Distribution by Region")
+plt.xlabel("Region")
+plt.ylabel("Total Sales Amount")
+plt.show()
+region_sales
+print(f"The top-performing region is: {region_sales.idxmax()}")
+
+region_category_sales = df.groupby(["shopping_mall", "category"])["Sales"].sum().unstack()
+
+region_category_sales.plot(kind="bar", stacked=True)
+plt.title("Sales Comparison by Region and Product Category")
+plt.xlabel("Region")
+plt.ylabel("Total Sales Amount")
+plt.legend(title="Product Category")
+plt.show()
+temp = df.groupby(["shopping_mall", "payment_method"])["Sales"].sum().unstack()
+plt.figure(figsize=(10,10))
+temp.plot(kind='bar', stacked=True)
+plt.xlabel("Shopping mall")
+plt.ylabel("Sales")
